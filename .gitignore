@@ -1,0 +1,10 @@
+/venv
+/htmlcov/
+/sent_emails/
+/static/
+yatube/posts/static/
+yatube/media/
+/.coverage
+/.coverage.*
+coverage.xml
+*.cover
