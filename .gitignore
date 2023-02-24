@@ -8,3 +8,4 @@ yatube/media/
 /.coverage.*
 coverage.xml
 *.cover
+.env

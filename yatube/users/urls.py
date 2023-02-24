@@ -22,7 +22,10 @@ urlpatterns = [
     ),
 
     path('password_reset/', views.PasswordResetView.as_view(
-        template_name='users/password_reset_form.html'),
+        template_name='users/password_reset_form.html',
+        subject_template_name='users/password_reset.txt',
+        email_template_name='users/reset_email.txt',
+    ),
         name='password_reset'
     ),
 

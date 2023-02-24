@@ -51,3 +51,5 @@ tomli==2.0.1
 traitlets==5.9.0
 urllib3==1.25.11
 wcwidth==0.2.6
+
+python-dotenv~=0.21.1
