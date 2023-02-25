@@ -3,12 +3,13 @@ from django.test import TestCase, Client
 from http import HTTPStatus
 
 from posts.models import Group, Post, User
-
-AUTHOR_USERNAME = 'TestAuthor'
-USER_USERNAME = 'TestUser'
-GROUP_TITLE = 'Тестовая группа'
-GROUP_SLUG = 'test-slug'
-POST_ID = 1
+from posts.tests.constants import (
+    AUTHOR_USERNAME,
+    USER_USERNAME,
+    POST_ID,
+    GROUP_TITLE,
+    GROUP_SLUG,
+)
 
 INDEX_URL = '/'
 GROUP_LIST_URL = f'/group/{GROUP_SLUG}/'

@@ -1,0 +1,16 @@
+AUTHOR_USERNAME = 'TestAuthor'
+USER_USERNAME = 'TestUser'
+POST_ID = 1
+POST_TEXT = 'Тестовый текст'
+NEW_POST_ID = 2
+POST_NEW_TEXT = 'Новый тестовый текст'
+GROUP_ID = 1
+GROUP_TITLE = 'Тестовая группа'
+GROUP_SLUG = 'test-slug'
+NEW_GROUP_ID = 2
+NEW_GROUP_TITLE = 'Новая тестовая группа'
+NEW_GROUP_SLUG = 'new-test-slug'
+GROUP_DESCRIPTION = 'Тестовое описание'
+COMMENT_ID = 1
+COMMENT_TEXT = 'Test comment'
+COMMENT_EDIT_TEXT = 'Edit test comment'

@@ -7,21 +7,27 @@ from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from posts.models import Group, Post, User, Comment
+from posts.tests.constants import (
+    AUTHOR_USERNAME,
+    USER_USERNAME,
+    POST_ID,
+    POST_TEXT,
+    POST_NEW_TEXT,
+    GROUP_ID,
+    GROUP_TITLE,
+    GROUP_SLUG,
+    NEW_GROUP_ID,
+    NEW_GROUP_TITLE,
+    NEW_GROUP_SLUG,
+    GROUP_DESCRIPTION,
+    COMMENT_ID,
+    COMMENT_TEXT,
+    COMMENT_EDIT_TEXT,
+)
 
-AUTHOR_USERNAME = 'TestAuthor'
-USER_USERNAME = 'TestUser'
-GROUP_TITLE = 'Тестовая группа'
-GROUP_SLUG = 'test-slug'
-GROUP_DESCRIPTION = 'Тестовое описание'
-POST_TEXT = 'Тестовый текст'
-POST_NEW_TEXT = 'Новый тестовый текст'
-POST_ID = 1
-GROUP_ID = 1
-COMMENT_ID = 1
-NEW_GROUP_TITLE = 'Новая тестовая группа'
-NEW_GROUP_ID = 2
-NEW_GROUP_SLUG = 'new-test-slug'
-COMMENT_TEXT = 'Test comment'
+IMAGE_NAME = 'test_image.gif'
+TYPE_OF_IMAGE = 'image/gif'
+NEW_IMAGE_NAME = 'test_image_new.gif'
 
 PROFILE_URL = reverse('posts:profile', kwargs={'username': AUTHOR_USERNAME})
 POST_DETAIL_URL = reverse('posts:post_detail', kwargs={'post_id': POST_ID})
@@ -33,6 +39,10 @@ COMMENT_EDIT_URL = reverse('posts:edit_comment',
 COMMENT_DELETE_URL = reverse('posts:delete_comment',
                              kwargs={'post_id': POST_ID,
                                      'comment_id': COMMENT_ID})
+LOGIN_URL = reverse('users:login')
+POST_CREATE_URL = reverse('posts:post_create')
+POST_DELETE_URL = reverse('posts:post_delete', kwargs={'post_id': POST_ID})
+ADD_COMMENT = reverse('posts:add_comment', kwargs={'post_id': POST_ID})
 TEST_GIF = (
     b'\x47\x49\x46\x38\x39\x61\x02\x00'
     b'\x01\x00\x80\x00\x00\x00\x00\x00'
@@ -42,9 +52,9 @@ TEST_GIF = (
     b'\x0A\x00\x3B'
 )
 UPLOADED = SimpleUploadedFile(
-    name='test_image.gif',
+    name=IMAGE_NAME,
     content=TEST_GIF,
-    content_type='image/gif'
+    content_type=TYPE_OF_IMAGE
 )
 TEST_GIF_NEW = (
     b'\x47\x49\x46\x38\x39\x61\x02\x00'
@@ -55,9 +65,9 @@ TEST_GIF_NEW = (
     b'\x0A\x00\x3B'
 )
 UPLOADED_NEW = SimpleUploadedFile(
-    name='test_image_new.gif',
+    name=NEW_IMAGE_NAME,
     content=TEST_GIF_NEW,
-    content_type='image/gif'
+    content_type=TYPE_OF_IMAGE
 )
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -91,7 +101,6 @@ class PostCreateFormTests(TestCase):
         """Создает пользователя"""
         self.authorized_client = Client()
         self.authorized_client.force_login(self.author)
-        # self.authorized_user.force_login(self.user)
 
     def test_create_task(self):
         """Валидная форма создает запись в Post."""
@@ -113,7 +122,7 @@ class PostCreateFormTests(TestCase):
                 text=POST_TEXT,
                 author=self.author,
                 group=self.group.id,
-                image='posts/test_image.gif'
+                image=f'posts/{IMAGE_NAME}'
             ).exists()
         )
 
@@ -148,7 +157,7 @@ class PostCreateFormTests(TestCase):
                 text=POST_NEW_TEXT,
                 author=self.author,
                 group=new_group.id,
-                image='posts/test_image_new.gif'
+                image=f'posts/{NEW_IMAGE_NAME}'
             ).exists()
         )
 
@@ -165,9 +174,9 @@ class PostCreateFormTests(TestCase):
             data=form_data,
             follow=True
         )
-        redirect_url = (reverse('users:login')
+        redirect_url = (LOGIN_URL
                         + '?next='
-                        + reverse('posts:post_create'))
+                        + POST_CREATE_URL)
         self.assertRedirects(response, redirect_url)
         self.assertEqual(Post.objects.count(), posts_count)
         self.assertFalse(
@@ -188,10 +197,10 @@ class PostCreateFormTests(TestCase):
             author=self.author,
         )
         form_data = {
-            'text': 'Тестовый комментарий',
+            'text': COMMENT_TEXT,
         }
         response = self.authorized_client.post(
-            reverse('posts:add_comment', kwargs={'post_id': POST_ID}),
+            ADD_COMMENT,
             data=form_data,
             follow=True
         )
@@ -199,7 +208,7 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(Comment.objects.count(), comments_count + 1)
         self.assertTrue(
             Comment.objects.filter(
-                text='Тестовый комментарий',
+                text=COMMENT_TEXT,
                 author=self.author,
             ).exists()
         )
@@ -213,7 +222,7 @@ class PostCreateFormTests(TestCase):
         )
         post_cnt = Post.objects.count()
         response = self.authorized_client.post(
-            reverse('posts:post_delete', kwargs={'post_id': POST_ID}),
+            POST_DELETE_URL,
             follow=True,
         )
         self.assertNotEqual(Post.objects.count(), post_cnt)
@@ -239,7 +248,7 @@ class PostCreateFormTests(TestCase):
         )
         comment_cnt = Comment.objects.count()
         form_data = {
-            'text': 'Редактированный коммент'
+            'text': COMMENT_EDIT_TEXT
         }
         response = self.authorized_client.post(
             COMMENT_EDIT_URL,
@@ -250,7 +259,7 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(Comment.objects.count(), comment_cnt)
         self.assertTrue(
             Comment.objects.filter(
-                text='Редактированный коммент',
+                text=COMMENT_EDIT_TEXT,
                 author=self.author
             ).exists()
         )

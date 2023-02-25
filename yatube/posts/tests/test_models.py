@@ -1,10 +1,11 @@
 from django.test import TestCase
 
 from posts.models import Post, Group, User
-
-AUTHOR_USERNAME = 'TestAuthor'
-GROUP_TITLE = 'Тестовая группа'
-POST_TEXT = 'Тестовый текст'
+from posts.tests.constants import (
+    AUTHOR_USERNAME,
+    GROUP_TITLE,
+    POST_TEXT,
+)
 
 NUMBER_OF_SYMBOLS = 15
 

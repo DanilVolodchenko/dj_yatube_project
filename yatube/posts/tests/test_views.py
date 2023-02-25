@@ -5,22 +5,27 @@ from http import HTTPStatus
 from django.core.cache import cache
 
 from posts.models import Group, Post, User
+from posts.tests.constants import (
+    AUTHOR_USERNAME,
+    USER_USERNAME,
+    POST_ID,
+    POST_TEXT,
+    NEW_POST_ID,
+    POST_NEW_TEXT,
+    GROUP_ID,
+    GROUP_TITLE,
+    GROUP_SLUG,
+    GROUP_DESCRIPTION,
+)
 
 POST_PER_PAGE = 10
 NUMBER_OF_POSTS = 2
 
-AUTHOR_USERNAME = 'TestAuthor'
-USER_USERNAME = 'TestUser'
-GROUP_TITLE = 'Тестовая группа'
-GROUP_SLUG = 'test-slug'
-GROUP_DESCRIPTION = 'Тестовое описание'
-POST_TEXT = 'Тестовый текст'
-POST_ID = 1
-GROUP_ID = 1
-
 INDEX_URL = reverse('posts:index')
 GROUP_LIST_URL = reverse('posts:group_list', kwargs={'slug': GROUP_SLUG})
-PROFILE_URL = reverse('posts:profile', kwargs={'username': AUTHOR_USERNAME})
+AUTHOR_PROFILE_URL = reverse('posts:profile',
+                             kwargs={'username': AUTHOR_USERNAME})
+USER_PROFILE_URL = reverse('posts:profile', kwargs={'username': USER_USERNAME})
 POST_DETAIL_URL = reverse('posts:post_detail', kwargs={'post_id': POST_ID})
 POST_EDIT_URL = reverse('posts:post_edit', kwargs={'post_id': POST_ID})
 CREATE_URL = reverse('posts:post_create')
@@ -29,8 +34,6 @@ PROFILE_FOLLOW_URL = reverse('posts:profile_follow',
                              kwargs={'username': AUTHOR_USERNAME})
 PROFILE_UNFOLLOW_URL = reverse('posts:profile_unfollow',
                                kwargs={'username': AUTHOR_USERNAME})
-
-URL_LIST = [INDEX_URL, GROUP_LIST_URL, PROFILE_URL]
 
 
 class PostViewTest(TestCase):
@@ -79,14 +82,14 @@ class PostViewTest(TestCase):
                 self.assertIsInstance(form_field, expected)
 
     def test_urls_correct_context(self):
-        """Проверяет index на правильный контекст"""
+        """Проверяет index на правильный контекст."""
         response = self.guest_client.get(INDEX_URL)
         self.assertEqual(
             response.context['page_obj'][0], Post.objects.all()[0])
 
     def test_profile_correct_context(self):
         """Проверяет profile на правильный контекст."""
-        response = self.guest_client.get(PROFILE_URL)
+        response = self.guest_client.get(AUTHOR_PROFILE_URL)
         self.assertEqual(response.context['page_obj'][0], Post.objects.filter(
             author=self.post.author)[0])
 
@@ -98,7 +101,8 @@ class PostViewTest(TestCase):
 
     def test_post_with_group_in_URLs(self):
         """Проверяет, что пост с группой находится на страницах URL_LIST."""
-        for address in URL_LIST:
+        addresses = (INDEX_URL, GROUP_LIST_URL, AUTHOR_PROFILE_URL)
+        for address in addresses:
             with self.subTest(address=address):
                 response = self.guest_client.get(address)
                 if self.post.group:
@@ -111,10 +115,10 @@ class PostViewTest(TestCase):
         self.assertNotIn(response.context['page_obj'], expected)
 
     def test_get_image_on_page(self):
-        """Проверяет, что в контексте есть image"""
+        """Проверяет, что в контексте есть image."""
         addresses = [
             INDEX_URL,
-            PROFILE_URL,
+            AUTHOR_PROFILE_URL,
             GROUP_LIST_URL,
         ]
         for address in addresses:
@@ -126,7 +130,7 @@ class PostViewTest(TestCase):
         self.assertIsNotNone(response.context['post'].image)
 
     def test_follow_and_unfollow_authorized_client(self):
-        """Подписка и отписка на автора"""
+        """Подписка и отписка на автора."""
         response = self.authorized_client.get(
             PROFILE_FOLLOW_URL
         )
@@ -137,12 +141,12 @@ class PostViewTest(TestCase):
         )
         self.assertRedirects(
             response,
-            reverse('posts:profile',
-                    kwargs={'username': self.user}))
+            USER_PROFILE_URL
+        )
 
     def test_context_create_on_follower(self):
         """Проверяет, что при добавлении поста автором,
-        этот пост появляется у подписавшегося"""
+        этот пост появляется у подписавшегося."""
         posts_cnt_before = Post.objects.filter(
             author__following__user=self.user).count()
 
@@ -150,7 +154,7 @@ class PostViewTest(TestCase):
             PROFILE_FOLLOW_URL
         )
         Post.objects.create(
-            text=NEW_POST_TEXT,
+            text=POST_NEW_TEXT,
             author=self.author
         )
         posts_cnt_after = Post.objects.filter(
@@ -189,7 +193,7 @@ class PaginatorViewsTest(TestCase):
         addresses = [
             INDEX_URL,
             GROUP_LIST_URL,
-            PROFILE_URL,
+            AUTHOR_PROFILE_URL,
         ]
         for address in addresses:
             with self.subTest(address=address):
@@ -202,10 +206,6 @@ class PaginatorViewsTest(TestCase):
                     len(response_2.context['page_obj']),
                     self.NUMBER_OF_POSTS - POST_PER_PAGE)
                 self.assertEqual(response_2.status_code, HTTPStatus.OK)
-
-
-NEW_POST_ID = 2
-NEW_POST_TEXT = 'Новый тестовый текст'
 
 
 class CacheViewsTest(TestCase):
@@ -222,7 +222,7 @@ class CacheViewsTest(TestCase):
         )
         cls.post_2 = Post.objects.create(
             id=NEW_POST_ID,
-            text=NEW_POST_TEXT,
+            text=POST_NEW_TEXT,
             author=cls.author,
         )
 
@@ -231,7 +231,7 @@ class CacheViewsTest(TestCase):
         self.authorized_client.force_login(self.author)
 
     def test_index_cache(self):
-        """Проверяет кэш главной страницы"""
+        """Проверяет кэш главной страницы."""
         # делаю первый запрос на страницу
         response_1 = self.authorized_client.get(INDEX_URL)
         # удаляю пост
