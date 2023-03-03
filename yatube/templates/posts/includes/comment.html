@@ -26,12 +26,14 @@
             <p>
                 {{ comment.text }}
             </p>
-            <a class="btn btn-primary" href="{% url 'posts:edit_comment' post.pk comment.pk %}">
-                Редактировать
-            </a>
-            <a class="btn btn-primary" href="{% url 'posts:delete_comment' post.pk comment.pk %}">
-                Удалить
-            </a>
+            {% if user.is_authenticated %}
+                <a class="btn btn-primary" href="{% url 'posts:edit_comment' post.pk comment.pk %}">
+                    Редактировать
+                </a>
+                <a class="btn btn-primary" href="{% url 'posts:delete_comment' post.pk comment.pk %}">
+                    Удалить
+                </a>
+            {% endif %}
         </div>
     </div>
 {% endfor %}

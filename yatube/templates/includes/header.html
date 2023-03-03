@@ -7,6 +7,13 @@
                 <img src="{% static 'img/logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
                 <span style="color:red">Ya</span>tube
             </a>
+            <form method="get" class="d-flex" role="search" action="{% url 'posts:post_search' %}">
+                <input class="form-control me-2" name="query" type="search" placeholder="Поиск постов"
+                       aria-label="Поиск постов">
+                <button type="submit" class="btn btn-primary">
+                    Найти
+                </button>
+            </form>
             {% with request.resolver_match.view_name as view_name %}
                 <ul class="nav nav-pills">
                     <li class="nav-item">

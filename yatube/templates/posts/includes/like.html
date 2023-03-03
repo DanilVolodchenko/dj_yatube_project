@@ -1,0 +1,17 @@
+<p>
+<div class="media mb-4">
+    <div class="media-body">
+        {% if is_like %}
+            <a class="btn btn-light"
+               href="{% url 'posts:post_dislike' post.pk %}" role="button">
+                Нравится {{ appraise_cnt }}
+            </a>
+        {% else %}
+            <a class="btn btn-primary "
+               href="{% url 'posts:post_like' post.pk %}" role="button">
+                Нравится {{ appraise_cnt }}
+            </a>
+        {% endif %}
+    </div>
+</div>
+</p>

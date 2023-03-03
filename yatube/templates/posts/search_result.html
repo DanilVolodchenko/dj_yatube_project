@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Результат поиска
+{% endblock %}
+
+{% block content %}
+    <div class="container py-5">
+        <h1>Результат поиска {{ object_list|length }}</h1>
+        <h3>Количество найденных записей </h3>
+        {% if object_list %}
+            {% for post in object_list %}
+                {% include 'posts/includes/post.html' %}
+            {% endfor %}
+{#            {{ object_list }}#}
+            {% include 'posts/includes/paginator.html' %}
+        {% else %}
+            <br>
+            <h3>Поиск не дал результатов</h3>
+        {% endif %}
+    </div>
+{% endblock %}

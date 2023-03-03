@@ -16,7 +16,7 @@ class Post(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='posts',
-        verbose_name='Автор'
+        verbose_name='Автор',
     )
     group = models.ForeignKey(
         'Group',
@@ -25,7 +25,7 @@ class Post(models.Model):
         null=True,
         related_name='posts',
         verbose_name='Группа',
-        help_text='Группа, к которой относится пост'
+        help_text='Группа, к которой относится пост',
     )
     image = models.ImageField(
         verbose_name='Картинка',
@@ -86,6 +86,10 @@ class Comment(models.Model):
     def __str__(self):
         return self.text
 
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
 
 class Follow(models.Model):
     user = models.ForeignKey(
@@ -106,3 +110,16 @@ class Follow(models.Model):
                 fields=['user', 'author'],
                 name='unique_follow'),
         )
+
+
+class Like(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='liker'
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='like'
+    )

@@ -28,7 +28,7 @@
                         {% if actions != 'delete' %}
                             <form method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
-                                <div class="form-group row my-3 p-3">
+                                <div class="form-control row my-3 p-3" type="file" id="formFile">
                                     {% for field in form %}
                                         <label for="id_text">
                                             {{ field.label }}

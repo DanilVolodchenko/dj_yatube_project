@@ -1,8 +1,9 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_page
 
-from .models import Group, Post, User, Follow, Comment
+from .models import Group, Post, User, Follow, Comment, Like
 from .forms import PostForm, CommentForm
 from .services import get_page
 
@@ -58,10 +59,14 @@ def post_detail(request, post_id):
     )
     comments = post.comments.all()
     form = CommentForm()
+    appraise_cnt = Like.objects.filter(post_id=post_id).count()
+    is_like = post.like.filter(user=request.user).exists()
     context = {
         'post': post,
         'comments': comments,
         'form': form,
+        'appraise_cnt': appraise_cnt,
+        'is_like': is_like
     }
     return render(request, 'posts/post_detail.html', context)
 
@@ -185,6 +190,7 @@ def delete_comment(request, post_id, comment_id):
 
 @login_required
 def follow_index(request):
+    """Выводит посты автора, на которые подписан пользователь."""
     user = request.user
     posts = Post.objects.filter(author__following__user=user)
     page_obj = get_page(request, posts)
@@ -196,6 +202,7 @@ def follow_index(request):
 
 @login_required
 def profile_follow(request, username):
+    """Подписка на автора."""
     user = request.user
     author = get_object_or_404(User, username=username)
     if author != user:
@@ -207,9 +214,39 @@ def profile_follow(request, username):
 
 @login_required
 def profile_unfollow(request, username):
+    """Отписка от автора."""
     user = request.user
     author = get_object_or_404(User, username=username)
     follow = Follow.objects.filter(user=user, author=author)
     follow.delete()
 
     return redirect('posts:profile', user)
+
+
+def post_like(request, post_id):
+    """Понравился пост"""
+    post = get_object_or_404(Post, pk=post_id)
+    Like.objects.get_or_create(user=request.user, post=post)
+    return redirect('posts:post_detail', post_id)
+
+
+def post_dislike(request, post_id):
+    """Понравился пост"""
+    post = get_object_or_404(Post, pk=post_id)
+    like = Like.objects.filter(user=request.user, post=post)
+    like.delete()
+    return redirect('posts:post_detail', post_id)
+
+
+def search(request):
+    """Производит поиск по посту"""
+    # получаю текст, который ввел пользователь
+    query = request.GET.get('query')
+    if query.strip() != '':
+        object_list = Post.objects.filter(
+            Q(text__icontains=query) | Q(author__username__icontains=query)
+        )
+        return render(request,
+                      'posts/search_result.html',
+                      {'object_list': object_list})
+    return redirect('posts:index')
