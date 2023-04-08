@@ -5,6 +5,7 @@
     <div class="container py-5">
         {% include 'posts/includes/switcher.html' %}
         <h1>Избранные авторы</h1>
+        <h4>Количество записей: {{ posts|length }}</h4>
         {% for post in page_obj %}
             {% include 'posts/includes/post.html' %}
         {% endfor %}

@@ -16,6 +16,7 @@ def index(request):
     posts = Post.objects.all().select_related('author', 'group')
     page_obj = get_page(request, posts)
     context = {
+        'posts': posts,
         'page_obj': page_obj
     }
 
@@ -28,6 +29,7 @@ def group_posts(request, slug):
     posts = group.posts.select_related('author')
     page_obj = get_page(request, posts)
     context = {
+        'posts': posts,
         'group': group,
         'page_obj': page_obj
     }
@@ -195,6 +197,7 @@ def follow_index(request):
     posts = Post.objects.filter(author__following__user=user)
     page_obj = get_page(request, posts)
     context = {
+        'posts': posts,
         'page_obj': page_obj,
     }
     return render(request, 'posts/follow.html', context)
